@@ -1462,6 +1462,33 @@ def split_by_fiscal_boundary(
     return objRanges
 
 
+def build_cp_period_ranges_from_selected_range(
+    objRange: Tuple[Tuple[int, int], Tuple[int, int]],
+) -> List[Tuple[Tuple[int, int], Tuple[int, int]]]:
+    objStart, objEnd = objRange
+    objResult: List[Tuple[Tuple[int, int], Tuple[int, int]]] = []
+
+    def add_range(objRangeItem: Tuple[Tuple[int, int], Tuple[int, int]]) -> None:
+        if objRangeItem not in objResult:
+            objResult.append(objRangeItem)
+
+    add_range(objRange)
+
+    objFiscalARanges = split_by_fiscal_boundary(objStart, objEnd, 3)
+    if len(objFiscalARanges) >= 2:
+        add_range(objFiscalARanges[-2])
+    if objFiscalARanges:
+        add_range(objFiscalARanges[-1])
+
+    objFiscalBRanges = split_by_fiscal_boundary(objStart, objEnd, 8)
+    if len(objFiscalBRanges) >= 2:
+        add_range(objFiscalBRanges[-2])
+    if objFiscalBRanges:
+        add_range(objFiscalBRanges[-1])
+
+    return objResult
+
+
 def try_parse_float(pszText: str) -> Optional[float]:
     pszValue: str = (pszText or "").strip()
     if pszValue == "":
@@ -5623,11 +5650,22 @@ def create_cp_company_step0009_excel(pszScriptDirectory: str) -> Optional[str]:
     pszTargetDirectory: str = os.path.join(pszScriptDirectory, "0001_CP別_step0009")
     if not os.path.isdir(pszTargetDirectory):
         return None
-    objTsvPaths = find_cp_company_step0009_vertical_paths(pszTargetDirectory)
-    if not objTsvPaths:
-        return None
     objRangePath = find_selected_range_path(pszTargetDirectory)
     objSelectedRange = parse_selected_range(objRangePath) if objRangePath else None
+
+    objTsvPaths: List[Tuple[str, str]] = []
+    if objSelectedRange is not None:
+        for objPeriodRange in build_cp_period_ranges_from_selected_range(objSelectedRange):
+            pszInputPath = build_cp_company_step0009_cumulative_path(pszTargetDirectory, objPeriodRange)
+            if not os.path.isfile(pszInputPath):
+                return None
+            (iStartYear, iStartMonth), (iEndYear, iEndMonth) = objPeriodRange
+            pszPeriodLabel = f"{iStartYear}年{iStartMonth:02d}月-{iEndYear}年{iEndMonth:02d}月"
+            objTsvPaths.append((pszPeriodLabel, pszInputPath))
+    else:
+        objTsvPaths = find_cp_company_step0009_vertical_paths(pszTargetDirectory)
+        if not objTsvPaths:
+            return None
 
     pszTemplatePath: str = os.path.join(
         pszScriptDirectory,
@@ -5676,11 +5714,22 @@ def create_cp_group_step0009_excel(pszScriptDirectory: str) -> Optional[str]:
     pszTargetDirectory: str = os.path.join(pszScriptDirectory, "0002_CP別_step0009")
     if not os.path.isdir(pszTargetDirectory):
         return None
-    objTsvPaths = find_cp_group_step0009_vertical_paths(pszTargetDirectory)
-    if not objTsvPaths:
-        return None
     objRangePath = find_selected_range_path(pszTargetDirectory)
     objSelectedRange = parse_selected_range(objRangePath) if objRangePath else None
+
+    objTsvPaths: List[Tuple[str, str]] = []
+    if objSelectedRange is not None:
+        for objPeriodRange in build_cp_period_ranges_from_selected_range(objSelectedRange):
+            pszInputPath = build_cp_group_step0009_cumulative_path(pszTargetDirectory, objPeriodRange)
+            if not os.path.isfile(pszInputPath):
+                return None
+            (iStartYear, iStartMonth), (iEndYear, iEndMonth) = objPeriodRange
+            pszPeriodLabel = f"{iStartYear}年{iStartMonth:02d}月-{iEndYear}年{iEndMonth:02d}月"
+            objTsvPaths.append((pszPeriodLabel, pszInputPath))
+    else:
+        objTsvPaths = find_cp_group_step0009_vertical_paths(pszTargetDirectory)
+        if not objTsvPaths:
+            return None
 
     pszTemplatePath: str = os.path.join(
         pszScriptDirectory,
@@ -5877,13 +5926,7 @@ def try_create_cp_step0009_vertical(pszDirectory: str) -> Optional[str]:
     if objRange is None:
         return None
 
-    objStart, objEnd = objRange
-    objTargetRanges: List[Tuple[Tuple[int, int], Tuple[int, int]]] = [objRange]
-    objFiscalBRanges = split_by_fiscal_boundary(objStart, objEnd, 8)
-    if objFiscalBRanges:
-        objLastRange = objFiscalBRanges[-1]
-        if objLastRange != objRange:
-            objTargetRanges.append(objLastRange)
+    objTargetRanges: List[Tuple[Tuple[int, int], Tuple[int, int]]] = build_cp_period_ranges_from_selected_range(objRange)
 
     for objRangeItem in objTargetRanges:
         build_cp_step0009_vertical_for_range(pszDirectory, objRangeItem)
@@ -5898,13 +5941,7 @@ def try_create_cp_group_step0009_vertical(pszDirectory: str) -> Optional[str]:
     if objRange is None:
         return None
 
-    objStart, objEnd = objRange
-    objTargetRanges: List[Tuple[Tuple[int, int], Tuple[int, int]]] = [objRange]
-    objFiscalBRanges = split_by_fiscal_boundary(objStart, objEnd, 8)
-    if objFiscalBRanges:
-        objLastRange = objFiscalBRanges[-1]
-        if objLastRange != objRange:
-            objTargetRanges.append(objLastRange)
+    objTargetRanges: List[Tuple[Tuple[int, int], Tuple[int, int]]] = build_cp_period_ranges_from_selected_range(objRange)
 
     for objRangeItem in objTargetRanges:
         pszCumulativePath = build_cp_group_step0008_cumulative_path(
