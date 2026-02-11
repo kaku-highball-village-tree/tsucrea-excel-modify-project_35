@@ -2662,6 +2662,16 @@ def build_step0004_rows_for_summary(objRows: List[List[str]]) -> List[List[str]]
             for pszName in objTargetNames:
                 fAllocationTotal += objTotalsByName[pszName][iAllocationIndex]
             objTotalOutputRow[iAllocationIndex] = format_number(fAllocationTotal)
+
+        iCompanySgAdminIndex: int = find_column_index(objHeaderRow, "カンパニー販管費")
+        if iCompanySgAdminIndex >= 0:
+            if len(objTotalOutputRow) <= iCompanySgAdminIndex:
+                objTotalOutputRow.extend([""] * (iCompanySgAdminIndex + 1 - len(objTotalOutputRow)))
+            fCompanySgAdminTotal: float = 0.0
+            for pszName in objTargetNames:
+                fCompanySgAdminTotal += objTotalsByName[pszName][iCompanySgAdminIndex]
+            objTotalOutputRow[iCompanySgAdminIndex] = format_number(fCompanySgAdminTotal)
+
         objOutputRows.append(objTotalOutputRow)
     return objOutputRows
 
@@ -2719,6 +2729,16 @@ def build_step0004_rows_for_group_summary(objRows: List[List[str]]) -> List[List
             for pszName in objTargetNames:
                 fAllocationTotal += objTotalsByName[pszName][iAllocationIndex]
             objTotalOutputRow[iAllocationIndex] = format_number(fAllocationTotal)
+
+        iCompanySgAdminIndex: int = find_column_index(objHeaderRow, "カンパニー販管費")
+        if iCompanySgAdminIndex >= 0:
+            if len(objTotalOutputRow) <= iCompanySgAdminIndex:
+                objTotalOutputRow.extend([""] * (iCompanySgAdminIndex + 1 - len(objTotalOutputRow)))
+            fCompanySgAdminTotal: float = 0.0
+            for pszName in objTargetNames:
+                fCompanySgAdminTotal += objTotalsByName[pszName][iCompanySgAdminIndex]
+            objTotalOutputRow[iCompanySgAdminIndex] = format_number(fCompanySgAdminTotal)
+
         objOutputRows.append(objTotalOutputRow)
     return objOutputRows
 
@@ -3854,12 +3874,14 @@ def create_pj_summary(
         pszDirectory,
         f"0005_PJサマリ_step0004_単月_損益計算書_{iEndYear}年{pszEndMonth}月.tsv",
     )
+    objSingleStep0003Rows0005 = read_tsv_rows(pszSingleStep0003Path0005)
     objSingleStep0004Rows0005 = build_step0004_rows_for_group_summary(objSingleStep0003Rows0005)
     write_tsv_rows(pszSingleStep0004Path0005, objSingleStep0004Rows0005)
     pszSingleStep0004Path: str = os.path.join(
         pszDirectory,
         f"0004_PJサマリ_step0004_単月_損益計算書_{iEndYear}年{pszEndMonth}月.tsv",
     )
+    objSingleStep0003Rows = read_tsv_rows(pszSingleStep0003Path)
     objSingleStep0004Rows = build_step0004_rows_for_summary(objSingleStep0003Rows)
     write_tsv_rows(pszSingleStep0004Path, objSingleStep0004Rows)
     pszSingleStep0005Path: str = os.path.join(
@@ -3951,6 +3973,7 @@ def create_pj_summary(
             f"{objEnd[0]}年{pszSummaryEndMonth}月.tsv"
         ),
     )
+    objCumulativeStep0003Rows0005 = read_tsv_rows(pszCumulativeStep0003Path0005)
     objCumulativeStep0004Rows0005 = build_step0004_rows_for_group_summary(
         objCumulativeStep0003Rows0005
     )
@@ -4005,6 +4028,7 @@ def create_pj_summary(
             f"{objEnd[0]}年{pszSummaryEndMonth}月.tsv"
         ),
     )
+    objCumulativeStep0003Rows = read_tsv_rows(pszCumulativeStep0003Path)
     objCumulativeStep0004Rows = build_step0004_rows_for_summary(objCumulativeStep0003Rows)
     write_tsv_rows(pszCumulativeStep0004Path, objCumulativeStep0004Rows)
     pszCumulativeStep0005Path: str = os.path.join(
