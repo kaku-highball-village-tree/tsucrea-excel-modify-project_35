@@ -2105,10 +2105,10 @@ def read_org_table_billing_company_map(pszOrgTableTsvPath: str) -> Dict[str, str
         raise objLastDecodeError
 
     for objRow in objRows:
-        if len(objRow) < 4:
+        if len(objRow) < 3:
             continue
-        pszProjectCodeOrg: str = str(objRow[2]).strip()
-        pszBillingCompany: str = str(objRow[3]).strip()
+        pszProjectCodeOrg: str = str(objRow[1]).strip()
+        pszBillingCompany: str = str(objRow[2]).strip()
         if not pszProjectCodeOrg or not pszBillingCompany:
             continue
         objMatch: re.Match[str] | None = re.match(r"^(P\d{5}|[A-OQ-Z]\d{3})", pszProjectCodeOrg)
@@ -2151,10 +2151,10 @@ def read_org_table_billing_group_map(pszOrgTableTsvPath: str) -> Dict[str, str]:
         raise objLastDecodeError
 
     for objRow in objRows:
-        if len(objRow) < 5:
+        if len(objRow) < 4:
             continue
-        pszProjectCodeOrg: str = str(objRow[2]).strip()
-        pszBillingGroup: str = str(objRow[4]).strip()
+        pszProjectCodeOrg: str = str(objRow[1]).strip()
+        pszBillingGroup: str = str(objRow[3]).strip()
         if not pszProjectCodeOrg or not pszBillingGroup:
             continue
         objMatch: re.Match[str] | None = re.match(
@@ -3328,6 +3328,31 @@ def main() -> int:
                 str(objStep14ProjectCompanyManhourPath),
                 str(objStep14OrgTableTsvPath),
             )
+            if os.path.isfile(objStep14ProjectCompanyManhourPath):
+                objStep0014ProjectManhourPath: Path = (
+                    objBaseDirectoryPath
+                    / f"工数_{iYear}年{iMonth:02d}月_step0014_各プロジェクトの工数.tsv"
+                )
+                objStep0014ProjectCompanyManhourPath: Path = (
+                    objBaseDirectoryPath
+                    / f"工数_{iYear}年{iMonth:02d}月_step0014_各プロジェクトの計上カンパニー名_工数.tsv"
+                )
+                objStep0014ProjectCompanyGroupManhourPath: Path = (
+                    objBaseDirectoryPath
+                    / f"工数_{iYear}年{iMonth:02d}月_step0014_各プロジェクトの計上カンパニー名_計上グループ_工数.tsv"
+                )
+                shutil.copyfile(
+                    objStep0013ProjectManhourPath,
+                    objStep0014ProjectManhourPath,
+                )
+                shutil.copyfile(
+                    objStep0013ProjectCompanyManhourPath,
+                    objStep0014ProjectCompanyManhourPath,
+                )
+                shutil.copyfile(
+                    objStep0013ProjectCompanyGroupManhourPath,
+                    objStep0014ProjectCompanyGroupManhourPath,
+                )
             make_step0006_unique_missing_project_tsv(
                 str(objStep0006MissingPath),
                 str(objStep0006UniqueMissingPath),
