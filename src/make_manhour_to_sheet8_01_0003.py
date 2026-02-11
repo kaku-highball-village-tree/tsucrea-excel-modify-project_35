@@ -16,6 +16,7 @@ import argparse
 import csv
 import os
 import re
+import shutil
 import sys
 import tkinter as tk
 from tkinter import messagebox
