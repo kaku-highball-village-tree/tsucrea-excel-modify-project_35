@@ -52,6 +52,61 @@ def get_target_year_month_from_filename(pszInputFilePath: str) -> Tuple[int, int
     return iYear, iMonth
 
 
+def split_by_fiscal_boundary(
+    objStartMonth: Tuple[int, int],
+    objEndMonth: Tuple[int, int],
+    iFiscalEndMonth: int,
+) -> List[Tuple[Tuple[int, int], Tuple[int, int]]]:
+    if objStartMonth > objEndMonth:
+        return []
+
+    objRanges: List[Tuple[Tuple[int, int], Tuple[int, int]]] = []
+    iCurrentYear, iCurrentMonth = objStartMonth
+
+    while (iCurrentYear, iCurrentMonth) <= objEndMonth:
+        iRangeEndYear: int = iCurrentYear
+        if iCurrentMonth > iFiscalEndMonth:
+            iRangeEndYear += 1
+        iRangeEndMonth: Tuple[int, int] = (iRangeEndYear, iFiscalEndMonth)
+        if iRangeEndMonth > objEndMonth:
+            iRangeEndMonth = objEndMonth
+
+        objRanges.append(((iCurrentYear, iCurrentMonth), iRangeEndMonth))
+
+        iNextYear, iNextMonth = iRangeEndMonth
+        if iNextMonth == 12:
+            iCurrentYear, iCurrentMonth = iNextYear + 1, 1
+        else:
+            iCurrentYear, iCurrentMonth = iNextYear, iNextMonth + 1
+
+    return objRanges
+
+
+def build_cumulative_ranges_including_previous_terms(
+    objStartMonth: Tuple[int, int],
+    objEndMonth: Tuple[int, int],
+) -> List[Tuple[Tuple[int, int], Tuple[int, int]]]:
+    objFiscalARanges = split_by_fiscal_boundary(objStartMonth, objEndMonth, 3)
+    objFiscalBRanges = split_by_fiscal_boundary(objStartMonth, objEndMonth, 8)
+    objAllRanges: List[Tuple[Tuple[int, int], Tuple[int, int]]] = []
+
+    def append_unique_range(objTargetRange: Tuple[Tuple[int, int], Tuple[int, int]]) -> None:
+        if objTargetRange not in objAllRanges:
+            objAllRanges.append(objTargetRange)
+
+    if objFiscalARanges:
+        if len(objFiscalARanges) >= 2:
+            append_unique_range(objFiscalARanges[-2])
+        append_unique_range(objFiscalARanges[-1])
+
+    if objFiscalBRanges:
+        if len(objFiscalBRanges) >= 2:
+            append_unique_range(objFiscalBRanges[-2])
+        append_unique_range(objFiscalBRanges[-1])
+
+    return objAllRanges
+
+
 def build_output_file_full_path(pszInputFileFullPath: str, pszOutputSuffix: str) -> str:
     pszDirectory: str = os.path.dirname(pszInputFileFullPath)
     pszBaseName: str = os.path.basename(pszInputFileFullPath)
