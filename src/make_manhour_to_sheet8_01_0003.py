@@ -2105,10 +2105,10 @@ def read_org_table_billing_company_map(pszOrgTableTsvPath: str) -> Dict[str, str
         raise objLastDecodeError
 
     for objRow in objRows:
-        if len(objRow) < 4:
+        if len(objRow) < 3:
             continue
-        pszProjectCodeOrg: str = str(objRow[2]).strip()
-        pszBillingCompany: str = str(objRow[3]).strip()
+        pszProjectCodeOrg: str = str(objRow[1]).strip()
+        pszBillingCompany: str = str(objRow[2]).strip()
         if not pszProjectCodeOrg or not pszBillingCompany:
             continue
         objMatch: re.Match[str] | None = re.match(r"^(P\d{5}|[A-OQ-Z]\d{3})", pszProjectCodeOrg)
@@ -2151,10 +2151,10 @@ def read_org_table_billing_group_map(pszOrgTableTsvPath: str) -> Dict[str, str]:
         raise objLastDecodeError
 
     for objRow in objRows:
-        if len(objRow) < 5:
+        if len(objRow) < 4:
             continue
-        pszProjectCodeOrg: str = str(objRow[2]).strip()
-        pszBillingGroup: str = str(objRow[4]).strip()
+        pszProjectCodeOrg: str = str(objRow[1]).strip()
+        pszBillingGroup: str = str(objRow[3]).strip()
         if not pszProjectCodeOrg or not pszBillingGroup:
             continue
         objMatch: re.Match[str] | None = re.match(
