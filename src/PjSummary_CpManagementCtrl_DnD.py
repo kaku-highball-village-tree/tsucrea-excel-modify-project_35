@@ -3,7 +3,7 @@
 SellGeneralAdminCost_Allocation_DnD.py
 
 ドラッグ＆ドロップで工数TSVと損益計算書TSVを受け取り、
-SellGeneralAdminCost_Allocation_Cmd.py を実行するGUI。
+SellGeneralAdminCost_Allocation_Cmd_0002.py を実行するGUI。
 
 使い方:
   ウィンドウに工数TSVと損益計算書TSVをドラッグ＆ドロップする。
@@ -1186,7 +1186,7 @@ def run_allocation_with_pairs(
 
     pszRangePath: Optional[str] = write_selected_range_file(objPairs)
     objArgs: List[str] = build_cmd_args(objPairs)
-    pszScriptPath: str = os.path.join(os.path.dirname(__file__), "SellGeneralAdminCost_Allocation_Cmd.py")
+    pszScriptPath: str = os.path.join(os.path.dirname(__file__), "SellGeneralAdminCost_Allocation_Cmd_0002.py")
     objCommand: List[str] = [sys.executable, pszScriptPath]
     objCommand.extend(objArgs)
 
@@ -1199,7 +1199,7 @@ def run_allocation_with_pairs(
         )
     except Exception as exc:  # noqa: BLE001
         pszErrorMessage: str = (
-            "Error: unexpected exception while running SellGeneralAdminCost_Allocation_Cmd.py. Detail = "
+            "Error: unexpected exception while running SellGeneralAdminCost_Allocation_Cmd_0002.py. Detail = "
             + str(exc)
         )
         show_error_message_box(pszErrorMessage, "SellGeneralAdminCost_Allocation_DnD")
@@ -1210,7 +1210,7 @@ def run_allocation_with_pairs(
         if pszStdErr.strip() == "":
             pszStdErr = "Process exited with non-zero return code and no stderr output."
         pszErrorMessage = (
-            "Error: SellGeneralAdminCost_Allocation_Cmd.py exited with non-zero return code.\n\n"
+            "Error: SellGeneralAdminCost_Allocation_Cmd_0002.py exited with non-zero return code.\n\n"
             + "Return code = "
             + str(objResult.returncode)
             + "\n\n"
@@ -1236,10 +1236,10 @@ def run_allocation_with_pairs(
 def run_pl_csv_to_tsv(
     objCsvFiles: List[str],
 ) -> int:
-    pszScriptPath: str = os.path.join(os.path.dirname(__file__), "PL_CsvToTsv_Cmd.py")
+    pszScriptPath: str = os.path.join(os.path.dirname(__file__), "PL_CsvToTsv_Cmd_0002.py")
     if not os.path.exists(pszScriptPath):
         pszErrorMessage: str = (
-            "Error: PL_CsvToTsv_Cmd.py not found. Path = " + pszScriptPath
+            "Error: PL_CsvToTsv_Cmd_0002.py not found. Path = " + pszScriptPath
         )
         show_error_message_box(pszErrorMessage, "SellGeneralAdminCost_Allocation_DnD")
         return 1
@@ -1255,7 +1255,7 @@ def run_pl_csv_to_tsv(
         )
     except Exception as exc:  # noqa: BLE001
         pszErrorMessage: str = (
-            "Error: unexpected exception while running PL_CsvToTsv_Cmd.py. Detail = "
+            "Error: unexpected exception while running PL_CsvToTsv_Cmd_0002.py. Detail = "
             + str(exc)
         )
         show_error_message_box(pszErrorMessage, "SellGeneralAdminCost_Allocation_DnD")
@@ -1266,7 +1266,7 @@ def run_pl_csv_to_tsv(
         if pszStdErr.strip() == "":
             pszStdErr = "Process exited with non-zero return code and no stderr output."
         pszErrorMessage = (
-            "Error: PL_CsvToTsv_Cmd.py exited with non-zero return code.\n\n"
+            "Error: PL_CsvToTsv_Cmd_0002.py exited with non-zero return code.\n\n"
             + "Return code = "
             + str(objResult.returncode)
             + "\n\n"
@@ -1284,7 +1284,7 @@ def run_pl_csv_to_tsv(
     for pszCsvPath in objCsvFiles:
         move_pl_outputs_to_temp(pszCsvPath)
 
-    pszMessage: str = "PL_CsvToTsv_Cmd.py finished successfully."
+    pszMessage: str = "PL_CsvToTsv_Cmd_0002.py finished successfully."
     if pszStdOut != "":
         pszMessage = pszStdOut
     show_message_box(pszMessage, "SellGeneralAdminCost_Allocation_DnD")
