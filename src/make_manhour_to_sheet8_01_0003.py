@@ -3328,6 +3328,31 @@ def main() -> int:
                 str(objStep14ProjectCompanyManhourPath),
                 str(objStep14OrgTableTsvPath),
             )
+            if os.path.isfile(objStep14ProjectCompanyManhourPath):
+                objStep0014ProjectManhourPath: Path = (
+                    objBaseDirectoryPath
+                    / f"工数_{iYear}年{iMonth:02d}月_step0014_各プロジェクトの工数.tsv"
+                )
+                objStep0014ProjectCompanyManhourPath: Path = (
+                    objBaseDirectoryPath
+                    / f"工数_{iYear}年{iMonth:02d}月_step0014_各プロジェクトの計上カンパニー名_工数.tsv"
+                )
+                objStep0014ProjectCompanyGroupManhourPath: Path = (
+                    objBaseDirectoryPath
+                    / f"工数_{iYear}年{iMonth:02d}月_step0014_各プロジェクトの計上カンパニー名_計上グループ_工数.tsv"
+                )
+                shutil.copyfile(
+                    objStep0013ProjectManhourPath,
+                    objStep0014ProjectManhourPath,
+                )
+                shutil.copyfile(
+                    objStep0013ProjectCompanyManhourPath,
+                    objStep0014ProjectCompanyManhourPath,
+                )
+                shutil.copyfile(
+                    objStep0013ProjectCompanyGroupManhourPath,
+                    objStep0014ProjectCompanyGroupManhourPath,
+                )
             make_step0006_unique_missing_project_tsv(
                 str(objStep0006MissingPath),
                 str(objStep0006UniqueMissingPath),
