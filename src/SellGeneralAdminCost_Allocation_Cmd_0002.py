@@ -6021,7 +6021,14 @@ def try_create_cp_step0009_vertical(pszDirectory: str) -> Optional[str]:
     if objRange is None:
         return None
 
-    objTargetRanges: List[Tuple[Tuple[int, int], Tuple[int, int]]] = build_cp_period_ranges_from_selected_range(objRange)
+    objTargetRanges: List[Tuple[Tuple[int, int], Tuple[int, int]]] = []
+    objAllRanges: List[Tuple[Tuple[int, int], Tuple[int, int]]] = build_cp_period_ranges_from_selected_range(objRange)
+    _, objSelectedEnd = objRange
+    for objRangeItem in objAllRanges:
+        if objRangeItem[1] == objSelectedEnd:
+            objTargetRanges.append(objRangeItem)
+    if not objTargetRanges:
+        objTargetRanges = objAllRanges
 
     for objRangeItem in objTargetRanges:
         build_cp_step0009_vertical_for_range(pszDirectory, objRangeItem)
