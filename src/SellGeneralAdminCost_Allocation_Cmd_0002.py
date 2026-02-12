@@ -74,7 +74,7 @@ def create_execution_folders() -> str:
 
 
 def find_latest_execution_root_directory() -> Optional[str]:
-    pszBaseDirectory = get_script_base_directory()
+    pszBaseDirectory = os.path.abspath(os.path.dirname(__file__))
     objCandidates: List[str] = []
     for pszName in os.listdir(pszBaseDirectory):
         if not pszName.endswith("_損益工数実行表"):
