@@ -5667,8 +5667,15 @@ def create_cp_company_step0009_excel(pszScriptDirectory: str) -> Optional[str]:
     objTsvPaths: List[Tuple[str, str]] = []
     if objSelectedRange is not None:
         objRequiredPeriodRanges = build_cp_period_ranges_from_selected_range(objSelectedRange)
+        _, objSelectedEnd = objSelectedRange
+        objRequiredCurrentPeriodRanges: List[Tuple[Tuple[int, int], Tuple[int, int]]] = [
+            objPeriodRange
+            for objPeriodRange in objRequiredPeriodRanges
+            if objPeriodRange[1] == objSelectedEnd
+        ]
+        objRequiredCheckRanges = objRequiredCurrentPeriodRanges or objRequiredPeriodRanges
         objMissingPeriodItems: List[Tuple[str, str]] = []
-        for objPeriodRange in objRequiredPeriodRanges:
+        for objPeriodRange in objRequiredCheckRanges:
             pszInputPath = build_cp_company_step0009_cumulative_path(pszTargetDirectory, objPeriodRange)
             (iStartYear, iStartMonth), (iEndYear, iEndMonth) = objPeriodRange
             pszPeriodLabel = f"{iStartYear}年{iStartMonth:02d}月-{iEndYear}年{iEndMonth:02d}月"
@@ -5681,7 +5688,7 @@ def create_cp_company_step0009_excel(pszScriptDirectory: str) -> Optional[str]:
         pszSelectedEndLabel = f"{iEndYear}年{iEndMonth:02d}月"
         objExistingTsvPaths = find_cp_company_step0009_vertical_paths(pszTargetDirectory)
         pszMissingReportPath: str = os.path.join(
-            pszTargetDirectory,
+            pszScriptDirectory,
             "0001_CP別_step0009_不足期間一覧.txt",
         )
         objLines: List[str] = []
@@ -5689,7 +5696,7 @@ def create_cp_company_step0009_excel(pszScriptDirectory: str) -> Optional[str]:
         objLines.append(f"選択範囲: {pszSelectedStartLabel}〜{pszSelectedEndLabel}")
         objLines.append("")
         objLines.append("必要期間一覧:")
-        for objRangeItem in objRequiredPeriodRanges:
+        for objRangeItem in objRequiredCheckRanges:
             (iReqStartYear, iReqStartMonth), (iReqEndYear, iReqEndMonth) = objRangeItem
             pszRequiredPeriodLabel = (
                 f"{iReqStartYear}年{iReqStartMonth:02d}月-"
