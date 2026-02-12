@@ -73,6 +73,39 @@ def create_execution_folders() -> str:
     return pszRootDirectory
 
 
+def find_latest_execution_root_directory() -> Optional[str]:
+    pszBaseDirectory = os.path.abspath(os.path.dirname(__file__))
+    objCandidates: List[str] = []
+    for pszName in os.listdir(pszBaseDirectory):
+        if not pszName.endswith("_損益工数実行表"):
+            continue
+        pszPath = os.path.join(pszBaseDirectory, pszName)
+        if os.path.isdir(pszPath):
+            objCandidates.append(pszPath)
+    if not objCandidates:
+        return None
+    objCandidates.sort()
+    return objCandidates[-1]
+
+
+def handle_period_left_double_click() -> None:
+    pszExecutionRoot = find_latest_execution_root_directory()
+    if pszExecutionRoot is None:
+        print("Error: 出力フォルダーがまだ作成されていません。")
+        return
+
+    pszPeriodDirectory = os.path.join(pszExecutionRoot, "期間")
+    pszTargetPath = os.path.join(
+        pszPeriodDirectory,
+        "SellGeneralAdminCost_Allocation_Cmd_AccountPeriodRange.txt",
+    )
+    if not os.path.isfile(pszTargetPath):
+        print("Error: ファイルが見つかりません。\n" + pszTargetPath)
+        return
+
+    os.startfile(pszTargetPath)
+
+
 def build_default_output_path(pszInputPlPath: str) -> str:
     pszScriptDirectory: str = get_script_base_directory()
     pszFileName: str
