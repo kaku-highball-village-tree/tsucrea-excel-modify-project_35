@@ -3819,11 +3819,11 @@ def create_pj_summary(
                     "0002_CP別_step0006",
                     create_step0007=False,
                 )
-        move_cp_step0001_to_step0004_vertical_files(
-            pszDirectory,
-            objStart,
-            objEnd,
-        )
+    move_cp_step0001_to_step0004_vertical_files(
+        pszDirectory,
+        objStart,
+        objEnd,
+    )
     copy_cp_step0005_vertical_files(
         pszDirectory,
         [
@@ -4964,6 +4964,12 @@ def move_cp_step0001_to_step0004_vertical_files(
                     f"0001_CP別_{pszStep}_単月_損益計算書_{iEndYear}年{pszEndMonth}月_vertical.tsv",
                 )
             )
+        objTargets.append(
+            os.path.join(
+                pszDirectory,
+                f"0002_CP別_step0004_単月_損益計算書_{iEndYear}年{pszEndMonth}月_vertical.tsv",
+            )
+        )
     for pszStep in ("step0001", "step0002", "step0003", "step0004"):
         objTargets.append(
             os.path.join(
@@ -4974,6 +4980,15 @@ def move_cp_step0001_to_step0004_vertical_files(
                 ),
             )
         )
+    objTargets.append(
+        os.path.join(
+            pszDirectory,
+            (
+                "0002_CP別_step0004_累計_損益計算書_"
+                f"{iStartYear}年{pszStartMonth}月-{iEndYear}年{pszEndMonth}月_vertical.tsv"
+            ),
+        )
+    )
     for pszPath in objTargets:
         if not os.path.isfile(pszPath):
             continue
