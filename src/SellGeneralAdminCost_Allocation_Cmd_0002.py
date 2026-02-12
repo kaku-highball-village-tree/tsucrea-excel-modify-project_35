@@ -5666,13 +5666,59 @@ def create_cp_company_step0009_excel(pszScriptDirectory: str) -> Optional[str]:
 
     objTsvPaths: List[Tuple[str, str]] = []
     if objSelectedRange is not None:
-        for objPeriodRange in build_cp_period_ranges_from_selected_range(objSelectedRange):
+        objRequiredPeriodRanges = build_cp_period_ranges_from_selected_range(objSelectedRange)
+        objMissingPeriodItems: List[Tuple[str, str]] = []
+        for objPeriodRange in objRequiredPeriodRanges:
             pszInputPath = build_cp_company_step0009_cumulative_path(pszTargetDirectory, objPeriodRange)
-            if not os.path.isfile(pszInputPath):
-                return None
             (iStartYear, iStartMonth), (iEndYear, iEndMonth) = objPeriodRange
             pszPeriodLabel = f"{iStartYear}年{iStartMonth:02d}月-{iEndYear}年{iEndMonth:02d}月"
+            if not os.path.isfile(pszInputPath):
+                objMissingPeriodItems.append((pszPeriodLabel, os.path.basename(pszInputPath)))
+                continue
             objTsvPaths.append((pszPeriodLabel, pszInputPath))
+        (iStartYear, iStartMonth), (iEndYear, iEndMonth) = objSelectedRange
+        pszSelectedStartLabel = f"{iStartYear}年{iStartMonth:02d}月"
+        pszSelectedEndLabel = f"{iEndYear}年{iEndMonth:02d}月"
+        objExistingTsvPaths = find_cp_company_step0009_vertical_paths(pszTargetDirectory)
+        pszMissingReportPath: str = os.path.join(
+            pszTargetDirectory,
+            "0001_CP別_step0009_不足期間一覧.txt",
+        )
+        objLines: List[str] = []
+        objLines.append(f"生成日時: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+        objLines.append(f"選択範囲: {pszSelectedStartLabel}〜{pszSelectedEndLabel}")
+        objLines.append("")
+        objLines.append("必要期間一覧:")
+        for objRangeItem in objRequiredPeriodRanges:
+            (iReqStartYear, iReqStartMonth), (iReqEndYear, iReqEndMonth) = objRangeItem
+            pszRequiredPeriodLabel = (
+                f"{iReqStartYear}年{iReqStartMonth:02d}月-"
+                f"{iReqEndYear}年{iReqEndMonth:02d}月"
+            )
+            objLines.append(f"- {pszRequiredPeriodLabel}")
+        objLines.append("")
+        objLines.append("存在しているTSV一覧:")
+        if objExistingTsvPaths:
+            for _, pszExistingPath in objExistingTsvPaths:
+                objLines.append(f"- {os.path.basename(pszExistingPath)}")
+        else:
+            objLines.append("- なし")
+        objLines.append("")
+        objLines.append("不足期間一覧:")
+        if objMissingPeriodItems:
+            for pszMissingPeriodLabel, pszMissingFileName in objMissingPeriodItems:
+                objLines.append(f"- 期間ラベル: {pszMissingPeriodLabel}")
+                objLines.append(f"  想定ファイル名（フル名）: {pszMissingFileName}")
+            objLines.append("")
+            objLines.append("判定結果: Excel未作成: 必要TSV不足")
+        else:
+            objLines.append("- 不足なし。")
+            objLines.append("")
+            objLines.append("判定結果: 必要TSV不足なし")
+        with open(pszMissingReportPath, "w", encoding="utf-8", newline="\n") as objReportFile:
+            objReportFile.write("\n".join(objLines) + "\n")
+        if objMissingPeriodItems:
+            return None
     else:
         objTsvPaths = find_cp_company_step0009_vertical_paths(pszTargetDirectory)
         if not objTsvPaths:
