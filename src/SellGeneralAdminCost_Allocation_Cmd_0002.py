@@ -3819,11 +3819,11 @@ def create_pj_summary(
                     "0002_CP別_step0006",
                     create_step0007=False,
                 )
-        move_cp_step0001_to_step0004_vertical_files(
-            pszDirectory,
-            objStart,
-            objEnd,
-        )
+    move_cp_step0001_to_step0004_vertical_files(
+        pszDirectory,
+        objStart,
+        objEnd,
+    )
     copy_cp_step0005_vertical_files(
         pszDirectory,
         [
