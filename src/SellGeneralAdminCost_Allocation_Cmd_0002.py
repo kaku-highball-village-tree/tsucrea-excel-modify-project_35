@@ -5117,28 +5117,10 @@ def create_pj_summary_gross_profit_ranking_excel(pszDirectory: str) -> Optional[
     objSheet = objWorkbook.worksheets[0]
     objSheet.title = "粗利金額ランキング"
     objRows = read_tsv_rows(pszInputPath)
-    objPlusMinusInfinityMarkers: Tuple[str, ...] = ("'＋∞", "'－∞", "＋∞", "－∞")
-    objPercentColumns: set[int] = set()
-    for objRow in objRows:
-        for iColumnIndex, pszValue in enumerate(objRow):
-            if pszValue in objPlusMinusInfinityMarkers:
-                objPercentColumns.add(iColumnIndex)
-
-    def is_numeric_ratio(pszValue: str) -> bool:
-        pszText = (pszValue or "").strip()
-        return bool(re.fullmatch(r"[+-]?\d+(?:\.\d+)?", pszText))
-
     iFormatRowIndex: int = 2 if objSheet.max_row >= 2 else 1
     for iRowIndex, objRow in enumerate(objRows, start=1):
         for iColumnIndex, pszValue in enumerate(objRow, start=1):
             objCellValue = parse_tsv_value_for_excel(pszValue)
-            if (
-                iRowIndex > 1
-                and (iColumnIndex - 1) in objPercentColumns
-                and pszValue not in objPlusMinusInfinityMarkers
-                and is_numeric_ratio(pszValue)
-            ):
-                objCellValue = f"{float(pszValue) * 100:.2f}%"
             objCell = objSheet.cell(
                 row=iRowIndex,
                 column=iColumnIndex,
@@ -5146,7 +5128,8 @@ def create_pj_summary_gross_profit_ranking_excel(pszDirectory: str) -> Optional[
             )
             if iRowIndex >= 2:
                 objFormatCell = objSheet.cell(row=iFormatRowIndex, column=iColumnIndex)
-                objCell.alignment = copy(objFormatCell.alignment)
+                if objFormatCell.number_format:
+                    objCell.number_format = objFormatCell.number_format
     pszTargetDirectory: str = os.path.join(pszDirectory, "PJサマリ")
     os.makedirs(pszTargetDirectory, exist_ok=True)
     pszOutputPath: str = os.path.join(
@@ -6038,7 +6021,14 @@ def try_create_cp_step0009_vertical(pszDirectory: str) -> Optional[str]:
     if objRange is None:
         return None
 
-    objTargetRanges: List[Tuple[Tuple[int, int], Tuple[int, int]]] = build_cp_period_ranges_from_selected_range(objRange)
+    objTargetRanges: List[Tuple[Tuple[int, int], Tuple[int, int]]] = []
+    objAllRanges: List[Tuple[Tuple[int, int], Tuple[int, int]]] = build_cp_period_ranges_from_selected_range(objRange)
+    _, objSelectedEnd = objRange
+    for objRangeItem in objAllRanges:
+        if objRangeItem[1] == objSelectedEnd:
+            objTargetRanges.append(objRangeItem)
+    if not objTargetRanges:
+        objTargetRanges = objAllRanges
 
     for objRangeItem in objTargetRanges:
         build_cp_step0009_vertical_for_range(pszDirectory, objRangeItem)
